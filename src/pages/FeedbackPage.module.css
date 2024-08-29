@@ -1,0 +1,14 @@
+/* General container styles */
+.container {
+  padding: 16px;
+  max-width: 100%; /* Ensure full width */
+  box-sizing: border-box; 
+  margin-top: 40px;/* Include padding in width */
+}
+
+/* Make sure the form is responsive */
+@media (max-width: 600px) {
+  .container {
+    padding: 8px; /* Reduce padding on small screens */
+  }
+}

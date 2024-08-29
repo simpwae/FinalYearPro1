@@ -1,0 +1,36 @@
+/* General styles */
+.button1 {
+  padding: 10px 20px;
+  font-size: 1rem;
+  border-radius: 4px;
+  border: none;
+  background-color: #1976d2; /* MUI primary color */
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.button1:hover {
+  background-color: #1565c0; /* Darker shade of primary color */
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.user-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid #1976d2; /* MUI primary color */
+}
+
+/* Responsive styles */
+@media (max-width: 600px) {
+  .button1 {
+    padding: 8px 16px;
+    font-size: 0.875rem;
+  }
+  
+  .user-button {
+    width: 32px;
+    height: 32px;
+  }
+}

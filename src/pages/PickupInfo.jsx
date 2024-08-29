@@ -1,39 +1,101 @@
-import React, { useState } from "react";
-import "./PickupInfo.css";
-const PickupInfo = () => {
-  const [mobileNumber, setMobileNumber] = useState("");
-  const [email, setEmail] = useState("");
-  const [shipperName, setShipperName] = useState("");
-  const [consignmentType, setConsignmentType] = useState("");
-  const [serviceType, setServiceType] = useState("");
-  const [weight, setWeight] = useState(0.0);
-  const [pickupDate, setPickupDate] = useState("");
-  const [originCity, setOriginCity] = useState("");
-  const [shipperAddress, setShipperAddress] = useState("");
-  const [landmark, setLandmark] = useState("");
-  const [buildingHouseNo, setBuildingHouseNo] = useState("");
-  const [consigneeName, setConsigneeName] = useState("");
-  const [consigneeAddress, setConsigneeAddress] = useState("");
-  const [consigneeEmail, setConsigneeEmail] = useState("");
-  const [consigneeMobileNumber, setConsigneeMobileNumber] = useState("");
-  const [pickupTime, setPickupTime] = useState("");
-  const [destinationCity, setDestinationCity] = useState("");
-  const [specialInstructions, setSpecialInstructions] = useState("");
+import React, { useState, useCallback } from "react";
+import { initializeApp } from "firebase/app";
+import { getFirestore, collection, addDoc } from "firebase/firestore";
+import { useNavigate } from "react-router-dom";
+import data from "../modules/Prices.json";
+import "./PickupInfo.css"; // Assuming this is where you style your form
 
-  const handleSubmit = (event) => {
+const firebaseConfig = {
+  apiKey: "AIzaSyAEzCNxIgewzTTgXT8hpXYA4x3_Swh4ScY",
+  authDomain: "final-year-project-ed293.firebaseapp.com",
+  projectId: "final-year-project-ed293",
+  storageBucket: "final-year-project-ed293.appspot.com",
+  messagingSenderId: "276657063134",
+  appId: "1:276657063134:web:2dbcee058a11023115ee4f",
+  measurementId: "G-B7V91X07CX",
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const PickupInfo = () => {
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    mobileNumber: "",
+    email: "",
+    serviceType: "",
+    weight: 0.0,
+    pickupDate: "",
+    originCity: "Peshawar",
+    pickUpAdd: "",
+    consigneeName: "",
+    consigneeAddress: "",
+    consigneeEmail: "",
+    consigneeMobileNumber: "",
+    pickupTime: "",
+    destinationCountry: "",
+    destinationCity: "",
+    specialInstructions: "",
+  });
+
+  const handleChange = useCallback(
+    (event) => {
+      const { name, value } = event.target;
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    },
+    []
+  );
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    // Call API or perform form submission logic here
-    console.log("Form submitted!");
+    try {
+      const docRef = await addDoc(collection(db, "userData"), formData);
+      console.log("Document written with ID: ", docRef.id);
+      navigate("/confirm");
+    } catch (e) {
+      console.error("Error adding document: ", e);
+    }
   };
 
+  const handleCityChange = useCallback(
+    (event) => {
+      const selectedCity = event.target.value;
+      const correspondingCountry = data.find(
+        (item) => item.destinationCity === selectedCity
+      )?.destinationCountry || "";
+      setFormData((prev) => ({
+        ...prev,
+        destinationCity: selectedCity,
+        destinationCountry: correspondingCountry,
+      }));
+    },
+    []
+  );
+
+  const handleCountryChange = useCallback(
+    (event) => {
+      const selectedCountry = event.target.value;
+      const firstCity = data.find(
+        (item) => item.destinationCountry === selectedCountry
+      )?.destinationCity || "";
+      setFormData((prev) => ({
+        ...prev,
+        destinationCountry: selectedCountry,
+        destinationCity: firstCity,
+      }));
+    },
+    []
+  );
+
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className="pickup-form">
       <label>
         Mobile Number*
         <input
           type="tel"
-          value={mobileNumber}
-          onChange={(event) => setMobileNumber(event.target.value)}
+          name="mobileNumber"
+          value={formData.mobileNumber}
+          onChange={handleChange}
           required
         />
       </label>
@@ -42,40 +104,24 @@ const PickupInfo = () => {
         Email*
         <input
           type="email"
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
+          name="email"
+          value={formData.email}
+          onChange={handleChange}
           required
         />
       </label>
 
       <label>
-        Shipper Name
-        <input
-          type="text"
-          value={shipperName}
-          onChange={(event) => setShipperName(event.target.value)}
-        />
-      </label>
-
-      <label>
-        Consignment Type
-        <select
-          value={consignmentType}
-          onChange={(event) => setConsignmentType(event.target.value)}
-        >
-          <option value="">Please Select</option>
-          {/* Add options for consignment types */}
-        </select>
-      </label>
-
-      <label>
         Service Type
         <select
-          value={serviceType}
-          onChange={(event) => setServiceType(event.target.value)}
+          name="serviceType"
+          value={formData.serviceType}
+          onChange={handleChange}
+          required
         >
           <option value="">Please Select</option>
-          {/* Add options for service types */}
+          <option value="Both">Express</option>
+          {/* Add more options if needed */}
         </select>
       </label>
 
@@ -83,9 +129,9 @@ const PickupInfo = () => {
         Weight (kg)
         <input
           type="number"
-          value={weight}
-          onChange={(event) => setWeight(event.target.value)}
-          step="0.1"
+          name="weight"
+          value={formData.weight}
+          onChange={handleChange}
         />
       </label>
 
@@ -93,8 +139,9 @@ const PickupInfo = () => {
         Pickup Date
         <input
           type="date"
-          value={pickupDate}
-          onChange={(event) => setPickupDate(event.target.value)}
+          name="pickupDate"
+          value={formData.pickupDate}
+          onChange={handleChange}
         />
       </label>
 
@@ -102,35 +149,19 @@ const PickupInfo = () => {
         Origin (City)
         <input
           type="text"
-          value={originCity}
-          onChange={(event) => setOriginCity(event.target.value)}
+          name="originCity"
+          value={formData.originCity}
+          readOnly
         />
       </label>
 
       <label>
-        Shipper Address
+        Pickup Address
         <input
           type="text"
-          value={shipperAddress}
-          onChange={(event) => setShipperAddress(event.target.value)}
-        />
-      </label>
-
-      <label>
-        Landmark
-        <input
-          type="text"
-          value={landmark}
-          onChange={(event) => setLandmark(event.target.value)}
-        />
-      </label>
-
-      <label>
-        Building/House No.
-        <input
-          type="text"
-          value={buildingHouseNo}
-          onChange={(event) => setBuildingHouseNo(event.target.value)}
+          name="pickUpAdd"
+          value={formData.pickUpAdd}
+          onChange={handleChange}
         />
       </label>
 
@@ -138,8 +169,9 @@ const PickupInfo = () => {
         Consignee Name
         <input
           type="text"
-          value={consigneeName}
-          onChange={(event) => setConsigneeName(event.target.value)}
+          name="consigneeName"
+          value={formData.consigneeName}
+          onChange={handleChange}
         />
       </label>
 
@@ -147,8 +179,9 @@ const PickupInfo = () => {
         Consignee Address
         <input
           type="text"
-          value={consigneeAddress}
-          onChange={(event) => setConsigneeAddress(event.target.value)}
+          name="consigneeAddress"
+          value={formData.consigneeAddress}
+          onChange={handleChange}
         />
       </label>
 
@@ -156,8 +189,9 @@ const PickupInfo = () => {
         Consignee Email
         <input
           type="email"
-          value={consigneeEmail}
-          onChange={(event) => setConsigneeEmail(event.target.value)}
+          name="consigneeEmail"
+          value={formData.consigneeEmail}
+          onChange={handleChange}
         />
       </label>
 
@@ -165,8 +199,9 @@ const PickupInfo = () => {
         Consignee Mobile Number
         <input
           type="tel"
-          value={consigneeMobileNumber}
-          onChange={(event) => setConsigneeMobileNumber(event.target.value)}
+          name="consigneeMobileNumber"
+          value={formData.consigneeMobileNumber}
+          onChange={handleChange}
         />
       </label>
 
@@ -174,25 +209,52 @@ const PickupInfo = () => {
         Pickup Time
         <input
           type="time"
-          value={pickupTime}
-          onChange={(event) => setPickupTime(event.target.value)}
+          name="pickupTime"
+          value={formData.pickupTime}
+          onChange={handleChange}
         />
       </label>
 
       <label>
         Destination (City)
-        <input
-          type="text"
-          value={destinationCity}
-          onChange={(event) => setDestinationCity(event.target.value)}
-        />
+        <select
+          name="destinationCity"
+          value={formData.destinationCity}
+          onChange={handleCityChange}
+          required
+        >
+          {data.map((item, index) => (
+            <option key={index} value={item.destinationCity}>
+              {item.destinationCity}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      <label>
+        Destination Country
+        <select
+          name="destinationCountry"
+          value={formData.destinationCountry}
+          onChange={handleCountryChange}
+          required
+        >
+          {[...new Set(data.map((item) => item.destinationCountry))].map(
+            (country, index) => (
+              <option key={index} value={country}>
+                {country}
+              </option>
+            )
+          )}
+        </select>
       </label>
 
       <label>
         Special Instructions
         <textarea
-          value={specialInstructions}
-          onChange={(event) => setSpecialInstructions(event.target.value)}
+          name="specialInstructions"
+          value={formData.specialInstructions}
+          onChange={handleChange}
         />
       </label>
 

@@ -1,15 +1,14 @@
 import React from "react";
-// import LoginPage from "./pages/LoginPage";
+import Nevbar from "./components/Nevbar/Nevbar";
+import RoutesPaths from "./routes/RoutesPaths";
 
-import PickupInfo from "./pages/PickupInfo";
-import LoginForm from './components/LoginForm/LoginForm'
-import Entry_Page from "./pages/Entry_Page";
+
+
 function App() {
   return (
     <>
-     <LoginForm />
-     <Entry_Page />
-      {/* <PickupInfo /> */}
+      <Nevbar />
+      <RoutesPaths />
     </>
   );
 }
