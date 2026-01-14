@@ -5,12 +5,15 @@ import { BrowserRouter } from "react-router-dom";
 import { ClerkProvider } from "@clerk/clerk-react";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "./pages/Dashboard/Theme";
+
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
 if (!PUBLISHABLE_KEY) {
   throw new Error("Missing Publishable Key");
 }
-ReactDOM.createRoot(document.getElementById("root")).render(
+
+// Disable StrictMode in production to avoid double renders
+const RootComponent = import.meta.env.DEV ? (
   <React.StrictMode>
     <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
       <BrowserRouter>
@@ -20,4 +23,14 @@ ReactDOM.createRoot(document.getElementById("root")).render(
       </BrowserRouter>
     </ClerkProvider>
   </React.StrictMode>
+) : (
+  <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
+    <BrowserRouter>
+      <ThemeProvider theme={theme}>
+        <App />
+      </ThemeProvider>
+    </BrowserRouter>
+  </ClerkProvider>
 );
+
+ReactDOM.createRoot(document.getElementById("root")).render(RootComponent);
